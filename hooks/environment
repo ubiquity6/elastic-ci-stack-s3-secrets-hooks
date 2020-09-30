@@ -26,16 +26,16 @@ if [[ -n "$s3_bucket" ]] ; then
   fi
 
   ssh_key_paths=(
-    "$s3_bucket_prefix/private_ssh_key"
-    "$s3_bucket_prefix/id_rsa_github"
+#    "$s3_bucket_prefix/private_ssh_key"
+#    "$s3_bucket_prefix/id_rsa_github"
     "private_ssh_key"
-    "id_rsa_github"
+#    "id_rsa_github"
   )
 
   for key in ${ssh_key_paths[*]} ; do
-    echo "Checking ${key}" >&2
-    if s3_exists "$s3_bucket" "$key" ; then
-      echo "Found ${key}, downloading" >&2;
+#    echo "Checking ${key}" >&2
+#    if s3_exists "$s3_bucket" "$key" ; then
+#      echo "Found ${key}, downloading" >&2;
       if ! ssh_key=$(s3_download "${s3_bucket}" "$key") ; then
         echo "+++ :warning: Failed to download ssh-key $key" >&2;
         exit 1
@@ -43,10 +43,10 @@ if [[ -n "$s3_bucket" ]] ; then
       echo "Downloaded ${#ssh_key} bytes of ssh key"
       add_ssh_private_key_to_agent "$ssh_key"
       key_found=1
-    elif [[ $? -eq 2 ]] ; then
-      echo "+++ :warning: Failed to check if $key exists" >&2;
-      exit 1
-    fi
+#    elif [[ $? -eq 2 ]] ; then
+#      echo "+++ :warning: Failed to check if $key exists" >&2;
+#      exit 1
+#    fi
   done
 
   if [[ -z "${key_found:-}" ]] && [[ "${BUILDKITE_REPO:-}" =~ ^git@ ]] ; then
@@ -56,17 +56,17 @@ if [[ -n "$s3_bucket" ]] ; then
   fi
 
   env_paths=(
-    "env"
+#    "env"
     "environment"
-    "${s3_bucket_prefix}/env"
-    "${s3_bucket_prefix}/environment"
+#    "${s3_bucket_prefix}/env"
+#    "${s3_bucket_prefix}/environment"
   )
 
   env_before="$(env | sort)"
 
   for key in ${env_paths[*]} ; do
-    echo "Checking ${key}" >&2
-    if s3_exists "$s3_bucket" "$key" ; then
+#    echo "Checking ${key}" >&2
+#    if s3_exists "$s3_bucket" "$key" ; then
       echo "Downloading env file from ${key}" >&2;
       if ! envscript=$(s3_download "${s3_bucket}" "$key") ; then
         echo "+++ :warning: Failed to download env from $key" >&2;
@@ -76,9 +76,9 @@ if [[ -n "$s3_bucket" ]] ; then
       set -o allexport
       eval "$envscript"
       set +o allexport
-    elif [[ $? -eq 2 ]] ; then
-      echo "Failed to check if $key exists" >&2;
-    fi
+#    elif [[ $? -eq 2 ]] ; then
+#      echo "Failed to check if $key exists" >&2;
+#    fi
   done
 
   git_credentials_paths=(
@@ -88,12 +88,12 @@ if [[ -n "$s3_bucket" ]] ; then
 
   git_credentials=()
 
-  for key in ${git_credentials_paths[*]} ; do
-    if s3_exists "$s3_bucket" "$key" ; then
-      echo "Adding git-credentials in $key as a credential helper" >&2;
-      git_credentials+=("'credential.helper=$basedir/git-credential-s3-secrets ${s3_bucket} ${key}'")
-    fi
-  done
+#  for key in ${git_credentials_paths[*]} ; do
+#    if s3_exists "$s3_bucket" "$key" ; then
+#      echo "Adding git-credentials in $key as a credential helper" >&2;
+#      git_credentials+=("'credential.helper=$basedir/git-credential-s3-secrets ${s3_bucket} ${key}'")
+#    fi
+#  done
 
   if [[ "${#git_credentials[@]}" -gt 0 ]] ; then
     export GIT_CONFIG_PARAMETERS
